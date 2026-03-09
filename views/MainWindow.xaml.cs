@@ -11,6 +11,7 @@ namespace AutoKomis
     {
         private List<Car> allCars = new();
         private bool isInitialized;
+        private readonly SqliteDatabase database = new();
 
         public MainWindow()
         {
@@ -24,6 +25,29 @@ namespace AutoKomis
 
         private void LoadData()
         {
+            try
+            {
+                allCars = database.GetAllCars();
+
+                // Jeśli baza jest pusta, spróbuj załadować z JSON jako fallback
+                if (allCars.Count == 0)
+                {
+                    LoadFromJsonIfAvailable();
+                }
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(
+                    $"Nie można wczytać danych z bazy: {exc.Message}",
+                    "Błąd",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
+
+        private void LoadFromJsonIfAvailable()
+        {
             string jsonFilePath = "resources/cars.json";
 
             if (!File.Exists(jsonFilePath))
@@ -32,7 +56,16 @@ namespace AutoKomis
             try
             {
                 string jsonString = File.ReadAllText(jsonFilePath);
-                allCars = JsonSerializer.Deserialize<List<Car>>(jsonString) ?? new List<Car>();
+                var carsFromJson = JsonSerializer.Deserialize<List<Car>>(jsonString);
+
+                if (carsFromJson != null && carsFromJson.Count > 0)
+                {
+                    foreach (var car in carsFromJson)
+                    {
+                        database.AddCar(car);
+                    }
+                    allCars = carsFromJson;
+                }
             }
             catch (Exception exc)
             {
@@ -59,6 +92,24 @@ namespace AutoKomis
             {
                 MessageBox.Show(
                     $"Nie można zapisać danych do pliku JSON: {exc.Message}",
+                    "Błąd",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
+
+        private void SaveToDatabase()
+        {
+            try
+            {
+                // Baza automatycznie zapisuje podczas dodawania
+                MessageBox.Show("Dane są automatycznie zapisywane w bazie SQLite!", "Informacja", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(
+                    $"Błąd podczas zapisywania: {exc.Message}",
                     "Błąd",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error
@@ -121,19 +172,25 @@ namespace AutoKomis
             var addCarWindow = new AddCarWindow();
             if (addCarWindow.ShowDialog() == true && addCarWindow.NewCar != null)
             {
-                allCars.Add(addCarWindow.NewCar);
-                UpdateMaxPrice();
-                ApplyFilters();
-                SaveToJson();
+                try
+                {
+                    database.AddCar(addCarWindow.NewCar);
+                    allCars.Add(addCarWindow.NewCar);
+                    UpdateMaxPrice();
+                    ApplyFilters();
 
-                MessageBox.Show("Pojazd został dodany pomyślnie!", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Pojazd został dodany pomyślnie do bazy danych!", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception exc)
+                {
+                    MessageBox.Show($"Błąd podczas dodawania pojazdu: {exc.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         private void SaveDatabaseBtn_Click(object sender, RoutedEventArgs e)
         {
-            SaveToJson();
-            MessageBox.Show("Baza danych została zapisana!", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+            SaveToDatabase();
         }
 
         private void SettingsBtn_Click(object sender, RoutedEventArgs e)

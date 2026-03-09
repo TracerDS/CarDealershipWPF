@@ -1,11 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.IO;
+using Microsoft.Win32;
 
 namespace AutoKomis
 {
     public partial class AddCarWindow : Window
     {
         public Car? NewCar { get; private set; }
+        private string? selectedImagePath;
 
         public AddCarWindow()
         {
@@ -22,14 +25,29 @@ namespace AutoKomis
 
             try
             {
-                NewCar = new Car
+                string? finalImagePath = null;
+
+                // Jeśli wybrano zdjęcie, skopiuj je do folderu Images
+                if (!string.IsNullOrEmpty(selectedImagePath) && File.Exists(selectedImagePath))
                 {
+                    string imagesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
+                    Directory.CreateDirectory(imagesFolder);
+
+                    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(selectedImagePath)}";
+                    string destinationPath = Path.Combine(imagesFolder, fileName);
+
+                    File.Copy(selectedImagePath, destinationPath, true);
+                    finalImagePath = Path.Combine("Images", fileName);
+                }
+
+                NewCar = new Car {
                     Brand = BrandTextBox.Text.Trim(),
                     Model = ModelTextBox.Text.Trim(),
                     Year = int.Parse(YearTextBox.Text),
                     Mileage = uint.Parse(MileageTextBox.Text),
-                    Fuel = ((ComboBoxItem)FuelComboBox.SelectedItem).Content.ToString() ?? "Benzyna",
-                    Price = decimal.Parse(PriceTextBox.Text)
+                    Fuel = ((ComboBoxItem) FuelComboBox.SelectedItem).Content.ToString() ?? "Benzyna",
+                    Price = decimal.Parse(PriceTextBox.Text),
+                    ImageData = finalImagePath != null ? File.ReadAllBytes(finalImagePath) : null,
                 };
 
                 DialogResult = true;
@@ -73,6 +91,85 @@ namespace AutoKomis
                 return false;
 
             return true;
+        }
+
+        private void BrowseImageBtn_Click(object sender, RoutedEventArgs e)
+        {
+            OpenImageFileDialog();
+        }
+
+        private void ImageContainer_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            OpenImageFileDialog();
+        }
+
+        private void OpenImageFileDialog()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "Wybierz zdjęcie pojazdu",
+                Filter = "Pliki obrazów|*.jpg;*.jpeg;*.png;*.bmp;*.gif|Wszystkie pliki|*.*",
+                FilterIndex = 1
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SetImagePreview(openFileDialog.FileName);
+            }
+        }
+
+        private void ImageDrop_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            e.Handled = true;
+        }
+
+        private void ImageDrop_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string filePath = files[0];
+                    string extension = Path.GetExtension(filePath).ToLower();
+
+                    if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || 
+                        extension == ".bmp" || extension == ".gif")
+                    {
+                        SetImagePreview(filePath);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Proszę wybrać plik obrazu (JPG, PNG, BMP, GIF).", 
+                                      "Nieprawidłowy format", 
+                                      MessageBoxButton.OK, 
+                                      MessageBoxImage.Warning);
+                    }
+                }
+            }
+        }
+
+        private void SetImagePreview(string imagePath)
+        {
+            try
+            {
+                selectedImagePath = imagePath;
+                PreviewImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath));
+                PreviewImage.Visibility = Visibility.Visible;
+                PlaceholderPanel.Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+                MessageBox.Show("Nie można wczytać obrazu.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
