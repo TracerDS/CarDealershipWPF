@@ -1,0 +1,47 @@
+﻿<Window x:Class="AutoKomis.AddCarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dodaj nowy pojazd" Height="500" Width="450"
+        WindowStartupLocation="CenterScreen" Background="#F4F6F9"
+        ResizeMode="NoResize">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Wprowadź dane pojazdu" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" Foreground="#333"/>
+
+        <StackPanel Grid.Row="1">
+            <TextBlock Text="Marka:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="BrandTextBox" Padding="8" Margin="0,0,0,15" FontSize="14"/>
+
+            <TextBlock Text="Model:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="ModelTextBox" Padding="8" Margin="0,0,0,15" FontSize="14"/>
+
+            <TextBlock Text="Rok produkcji:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="YearTextBox" Padding="8" Margin="0,0,0,15" FontSize="14"/>
+
+            <TextBlock Text="Przebieg (km):" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="MileageTextBox" Padding="8" Margin="0,0,0,15" FontSize="14"/>
+
+            <TextBlock Text="Rodzaj paliwa:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <ComboBox x:Name="FuelComboBox" Padding="8" Margin="0,0,0,15" FontSize="14" SelectedIndex="0">
+                <ComboBoxItem Content="Benzyna"/>
+                <ComboBoxItem Content="Diesel"/>
+                <ComboBoxItem Content="Hybryda"/>
+                <ComboBoxItem Content="Elektryczny"/>
+            </ComboBox>
+
+            <TextBlock Text="Cena (PLN):" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="PriceTextBox" Padding="8" Margin="0,0,0,15" FontSize="14"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="CancelBtn" Content="Anuluj" Background="#6C757D" Foreground="White" Padding="20,10" Margin="0,0,10,0" BorderThickness="0" Cursor="Hand" Click="CancelBtn_Click"/>
+            <Button x:Name="AddBtn" Content="Dodaj pojazd" Background="#28A745" Foreground="White" Padding="20,10" BorderThickness="0" Cursor="Hand" Click="AddBtn_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

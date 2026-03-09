@@ -1,0 +1,34 @@
+﻿[
+  {
+    "Brand": "Audi",
+    "Model": "A4 B9",
+    "Year": 2018,
+    "Mileage": 145000,
+    "Fuel": "Diesel",
+    "Price": 89900
+  },
+  {
+    "Brand": "Toyota",
+    "Model": "Camry",
+    "Year": 2021,
+    "Mileage": 45000,
+    "Fuel": "Hybryda",
+    "Price": 135000
+  },
+  {
+    "Brand": "BMW",
+    "Model": "Seria 3 G20",
+    "Year": 2020,
+    "Mileage": 82000,
+    "Fuel": "Benzyna",
+    "Price": 155000
+  },
+  {
+    "Brand": "Volvo",
+    "Model": "XC60",
+    "Year": 2019,
+    "Mileage": 110000,
+    "Fuel": "Diesel",
+    "Price": 142000
+  }
+]
